@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>猪猪侠幸运大抽奖 - 愚人节特别活动</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #fd79a8 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-decoration {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50px;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .cloud:nth-child(1) { width: 100px; height: 40px; top: 10%; left: -100px; animation-duration: 25s; }
+        .cloud:nth-child(2) { width: 80px; height: 35px; top: 20%; left: -80px; animation-duration: 30s; animation-delay: 5s; }
+        .cloud:nth-child(3) { width: 120px; height: 45px; top: 60%; left: -120px; animation-duration: 35s; animation-delay: 10s; }
+
+        @keyframes float {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(calc(100vw + 200px)) translateY(-20px); }
+            100% { transform: translateX(calc(100vw + 200px)) translateY(0); }
+        }
+
+        .pig-header {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 80px;
+            height: 80px;
+            background: #ff6b9d;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.3);
+            animation: pigBounce 2s infinite ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border: 3px solid #fff;
+        }
+
+        @keyframes pigBounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: titlePop 1s ease-out;
+        }
+
+        @keyframes titlePop {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .title {
+            font-size: 28px;
+            color: #fff;
+            text-shadow: 3px 3px 0px #e84393, -1px -1px 0 #fd79a8;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #fff;
+            background: rgba(255, 107, 157, 0.8);
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            margin: 0 auto 25px;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+        }
+
+        .wheel-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid #fff;
+            box-shadow: 0 0 0 8px #ff6b9d;
+            overflow: hidden;
+            position: relative;
+            background: #fff;
+        }
+
+        #wheel-svg {
+            width: 100%;
+            height: 100%;
+            transition: transform 4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #e84393;
+            z-index: 20;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #ff6b9d, #fd79a8);
+            border-radius: 50%;
+            border: 5px solid #fff;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .spin-btn, .reset-btn {
+            padding: 14px 35px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #ff6b9d 0%, #fd79a8 100%);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            display: none;
+        }
+
+        .spin-btn:active, .reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 各奖品专属界面 */
+        .prize-page {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .prize-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 35px 25px;
+            margin: 10px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prize-icon {
+            font-size: 80px;
+            margin-bottom: 15px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .prize-name {
+            font-size: 28px;
+            color: #e84393;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .prize-desc {
+            font-size: 18px;
+            color: #636e72;
+            margin-bottom: 25px;
+        }
+
+        .claim-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 184, 148, 0.4);
+            transition: transform 0.2s;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .claim-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 谢谢参与界面 */
+        .thanks-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px 30px;
+            margin: 10px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .thanks-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: shake 1s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .thanks-text {
+            font-size: 28px;
+            color: #636e72;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .thanks-subtext {
+            font-size: 18px;
+            color: #b2bec3;
+            margin-bottom: 25px;
+        }
+
+        .try-again-btn {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(253, 203, 110, 0.4);
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
+
+        .try-again-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 刮刮乐界面 */
+        .scratch-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .scratch-title {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .scratch-card-wrapper {
+            position: relative;
+            width: 300px;
+            height: 180px;
+            margin: 0 auto 25px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .scratch-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #d63031;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #fff, 4px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        .scratch-bg .prize-text {
+            font-size: 22px;
+            color: #2d3436;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ff6b9d' opacity='0.8'/%3E%3C/svg%3E") 16 16, auto;
+            touch-action: none;
+        }
+
+        .scratch-hint {
+            color: #fff;
+            font-size: 16px;
+            margin-top: 15px;
+            opacity: 0.9;
+            animation: pulse 1.5s infinite;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+        }
+
+        /* 100万专属庆祝界面 */
+        .million-box {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+            border-radius: 25px;
+            padding: 40px 25px;
+            margin: 10px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 5px solid #fff;
+        }
+
+        .million-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: shine 1s infinite;
+        }
+
+        @keyframes shine {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.1); filter: brightness(1.3); }
+        }
+
+        .million-text {
+            font-size: 36px;
+            color: #d63031;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        .million-subtext {
+            font-size: 20px;
+            color: #2d3436;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .prank-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .prank-content {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 30px;
+            padding: 40px 30px;
+            text-align: center;
+            max-width: 340px;
+            width: 90%;
+            position: relative;
+            animation: bounceIn 0.6s;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border: 6px solid #fff;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            50% { transform: scale(1.05) rotate(5deg); }
+            70% { transform: scale(0.9) rotate(-3deg); }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .prank-pig {
+            font-size: 90px;
+            margin-bottom: 20px;
+            animation: wiggle 1s infinite;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.1); }
+        }
+
+        .prank-text {
+            font-size: 32px;
+            color: #d63031;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            text-shadow: 3px 3px 0px #fff;
+        }
+
+        .prank-subtext {
+            font-size: 18px;
+            color: #636e72;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .close-prank {
+            background: linear-gradient(135deg, #ff6b9d, #e84393);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .close-prank:active {
+            transform: scale(0.95);
+        }
+
+        .april-fool-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff6b9d 0%, #fdcb6e 30%, #6c5ce7 70%, #00b894 100%);
+            z-index: 2000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: bgChange 4s infinite alternate;
+        }
+
+        @keyframes bgChange {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(45deg); }
+        }
+
+        .april-text {
+            font-size: 52px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.5);
+            animation: textPop 1s infinite alternate;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .april-text small {
+            font-size: 28px;
+            display: block;
+            margin-top: 10px;
+        }
+
+        @keyframes textPop {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .april-emoji {
+            font-size: 100px;
+            margin: 20px;
+            animation: floatEmoji 2s infinite ease-in-out;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }
+
+        @keyframes floatEmoji {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-25px) rotate(5deg); }
+        }
+
+        .april-subtitle {
+            color: #fff;
+            font-size: 20px;
+            margin-top: 20px;
+            text-align: center;
+            padding: 0 30px;
+            line-height: 1.6;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .continue-btn {
+            margin-top: 40px;
+            padding: 15px 45px;
+            background: #fff;
+            color: #ff6b9d;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            animation: btnPulse 1.5s infinite;
+            transition: transform 0.2s;
+        }
+
+        .continue-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 5px 40px rgba(255,255,255,0.8); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            top: -15px;
+            animation: confetti-fall 3s linear forwards;
+            z-index: 999;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 380px) {
+            .wheel-wrapper {
+                width: 300px;
+                height: 300px;
+            }
+            .title {
+                font-size: 24px;
+            }
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+    </div>
+
+    <div class="pig-header">🐷</div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">猪猪侠幸运大抽奖</h1>
+            <div class="subtitle">神秘大奖等你拿</div>
+        </div>
+
+        <!-- 转盘区域 -->
+        <div class="wheel-section" id="wheelSection">
+            <div class="wheel-wrapper">
+                <div class="pointer"></div>
+                <div class="wheel-container">
+                    <svg id="wheel-svg" viewBox="0 0 340 340">
+                    </svg>
+                </div>
+                <div class="wheel-center">🐷</div>
+            </div>
+            <div class="btn-group">
+                <button class="spin-btn" id="spinBtn" onclick="startSpin()">开始抽奖 🎰</button>
+                <button class="reset-btn" id="resetBtn" onclick="resetGame()">再抽一次 🔄</button>
+            </div>
+        </div>
+
+        <!-- iPhone 17 Pro Max 领取界面 -->
+        <div class="prize-page" id="iphonePage">
+            <div class="prize-box">
+                <div class="prize-icon">📱</div>
+                <div class="prize-name">iPhone 17 Pro Max</div>
+                <div class="prize-desc">最新款苹果手机，钛金属边框</div>
+                <button class="claim-btn" onclick="showPrank()">立即领取手机</button>
+            </div>
+        </div>
+
+        <!-- 现金红包888元 领取界面 -->
+        <div class="prize-page" id="hongbaoPage">
+            <div class="prize-box">
+                <div class="prize-icon">🧧</div>
+                <div class="prize-name">现金红包 888元</div>
+                <div class="prize-desc">现金直接到账，秒提现</div>
+                <button class="claim-btn" onclick="showPrank()">打开红包领888元</button>
+            </div>
+        </div>
+
+        <!-- 猪猪侠玩偶 领取界面 -->
+        <div class="prize-page" id="dollPage">
+            <div class="prize-box">
+                <div class="prize-icon">🐷</div>
+                <div class="prize-name">猪猪侠限量玩偶</div>
+                <div class="prize-desc">超可爱周边，限量珍藏版</div>
+                <button class="claim-btn" onclick="showPrank()">领取玩偶</button>
+            </div>
+        </div>
+
+        <!-- 超级大奖100万 专属庆祝界面 -->
+        <div class="prize-page" id="millionPage">
+            <div class="million-box">
+                <div class="million-icon">💰</div>
+                <div class="million-text">¥1,000,000</div>
+                <div class="million-subtext">🎉 超级大奖！一夜暴富！🎉</div>
+                <button class="claim-btn" onclick="showPrank()" style="background: linear-gradient(135deg, #e84393, #fd79a8);">领取100万大奖</button>
+            </div>
+        </div>
+
+        <!-- 谢谢参与 界面 -->
+        <div class="prize-page" id="thanksPage">
+            <div class="thanks-box">
+                <div class="thanks-icon">😢</div>
+                <div class="thanks-text">别灰心，再试一次</div>
+                <div class="thanks-subtext">运气不好，下次一定中！</div>
+                <button class="try-again-btn" onclick="resetGame()">再抽一次 🔄</button>
+            </div>
+        </div>
+
+        <!-- 刮刮乐界面 -->
+        <div class="scratch-container" id="scratchSection">
+            <div class="scratch-title">恭喜你获得神秘刮刮乐！✨</div>
+            <div class="scratch-card-wrapper" id="scratchWrapper">
+                <div class="scratch-bg">
+                    <div>💰 1,000,000</div>
+                    <div class="prize-text">恭喜你中了一百万！</div>
+                </div>
+                <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+            </div>
+            <div class="scratch-hint">👆 用手指刮开涂层查看奖品</div>
+        </div>
+    </div>
+
+    <!-- 愚人节整蛊弹窗 -->
+    <div class="prank-modal" id="prankModal" onclick="closePrank(event)">
+        <div class="prank-content" onclick="event.stopPropagation()">
+            <div class="prank-pig">🐷</div>
+            <div class="prank-text">愚人节快乐！<br>你被骗啦小笨蛋~</div>
+            <div class="prank-subtext">哈哈，今天可是4月1日哦！</div>
+            <button class="close-prank" onclick="showAprilFoolScreen()">我知道啦 😝</button>
+        </div>
+    </div>
+
+    <!-- 愚人节快乐全屏 -->
+    <div class="april-fool-screen" id="aprilScreen">
+        <div class="april-text">🎉 愚人节快乐 🎉<small>April Fools' Day</small></div>
+        <div class="april-emoji">🤡 🐷 🎪</div>
+        <div class="april-subtitle">
+            感谢参与猪猪侠幸运大抽奖<br>
+            明年愚人节再来试试运气吧！
+        </div>
+        <button class="continue-btn" onclick="resetGame()">再玩一次 🔄</button>
+    </div>
+
+    <script>
+        // 奖品配置 - 每个奖品对应专属页面ID
+        const prizes = [
+            { 
+                id: 'iphone', 
+                text: 'iPhone 17\nPro Max', 
+                color: '#ff6b9d',
+                pageId: 'iphonePage'
+            },
+            { 
+                id: 'hongbao', 
+                text: '现金红包\n888元', 
+                color: '#fdcb6e',
+                pageId: 'hongbaoPage'
+            },
+            { 
+                id: 'scratch', 
+                text: '神秘刮刮乐\n🎁', 
+                color: '#6c5ce7',
+                pageId: 'scratchSection',
+                isScratch: true
+            },
+            { 
+                id: 'doll', 
+                text: '猪猪侠玩偶\n🐷', 
+                color: '#00b894',
+                pageId: 'dollPage'
+            },
+            { 
+                id: 'money', 
+                text: '超级大奖\n100万', 
+                color: '#e17055',
+                pageId: 'millionPage'
+            },
+            { 
+                id: 'thanks', 
+                text: '谢谢参与\n😢', 
+                color: '#0984e3',
+                pageId: 'thanksPage',
+                noPrank: true  // 不进入整蛊流程
+            }
+        ];
+
+        let isSpinning = false;
+        let isScratched = false;
+        let currentRotation = 0;
+        let currentPrize = null;
+
+        function initWheel() {
+            const svg = document.getElementById('wheel-svg');
+            const centerX = 170;
+            const centerY = 170;
+            const radius = 160;
+            const anglePerSector = 360 / prizes.length;
+
+            prizes.forEach((prize, index) => {
+                const startAngle = index * anglePerSector;
+                const endAngle = (index + 1) * anglePerSector;
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const d = describeArc(centerX, centerY, radius, startAngle, endAngle);
+                path.setAttribute('d', d);
+                path.setAttribute('fill', prize.color);
+                path.setAttribute('stroke', '#fff');
+                path.setAttribute('stroke-width', '3');
+                svg.appendChild(path);
+
+                const midAngle = startAngle + anglePerSector / 2;
+                const textRadius = radius * 0.6;
+                const textX = centerX + textRadius * Math.cos((midAngle - 90) * Math.PI / 180);
+                const textY = centerY + textRadius * Math.sin((midAngle - 90) * Math.PI / 180);
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('transform', `rotate(${midAngle}, ${textX}, ${textY})`);
+
+                const lines = prize.text.split('\n');
+                lines.forEach((line, lineIndex) => {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', textX);
+                    text.setAttribute('y', textY + (lineIndex - (lines.length-1)/2) * 20);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('dominant-baseline', 'middle');
+                    text.setAttribute('fill', '#fff');
+                    text.setAttribute('font-size', '13');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.4);');
+                    text.textContent = line;
+                    g.appendChild(text);
+                });
+
+                svg.appendChild(g);
+            });
+        }
+
+        function describeArc(x, y, radius, startAngle, endAngle) {
+            const start = polarToCartesian(x, y, radius, endAngle);
+            const end = polarToCartesian(x, y, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+            
+            return [
+                "M", x, y,
+                "L", start.x, start.y,
+                "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+                "L", x, y
+            ].join(" ");
+        }
+
+        function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+            const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+            return {
+                x: centerX + (radius * Math.cos(angleInRadians)),
+                y: centerY + (radius * Math.sin(angleInRadians))
+            };
+        }
+
+        function startSpin() {
+            if (isSpinning) return;
+            isSpinning = true;
+            
+            const wheel = document.getElementById('wheel-svg');
+            const btn = document.getElementById('spinBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            btn.disabled = true;
+            btn.textContent = '抽奖中...';
+            resetBtn.style.display = 'none';
+
+            // 完全随机选择奖品
+            const prizeIndex = Math.floor(Math.random() * prizes.length);
+            currentPrize = prizes[prizeIndex];
+            
+            const anglePerSector = 360 / prizes.length;
+            const targetAngle = prizeIndex * anglePerSector + anglePerSector / 2;
+            
+            const baseRotation = 360 * 5;
+            const rotationNeeded = 360 - targetAngle;
+            const randomOffset = Math.random() * 10 - 5;
+            const finalRotation = currentRotation + baseRotation + rotationNeeded + randomOffset;
+            
+            currentRotation = finalRotation;
+            wheel.style.transform = `rotate(${finalRotation}deg)`;
+
+            setTimeout(() => {
+                showResult();
+                btn.disabled = false;
+                btn.textContent = '开始抽奖 🎰';
+            }, 4000);
+        }
+
+        function showResult() {
+            // 隐藏转盘
+            document.getElementById('wheelSection').style.display = 'none';
+            
+            // 显示对应奖品的专属页面
+            if (currentPrize.isScratch) {
+                // 刮刮乐特殊处理
+                document.getElementById('scratchSection').style.display = 'block';
+                initScratchCard();
+            } else {
+                // 其他奖品显示对应页面
+                document.getElementById(currentPrize.pageId).style.display = 'block';
+            }
+            
+            createConfetti();
+        }
+
+        function initScratchCard() {
+            const canvas = document.getElementById('scratchCanvas');
+            const wrapper = document.getElementById('scratchWrapper');
+            
+            const rect = wrapper.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#b2bec3';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#636e72';
+            for (let i = 0; i < 200; i++) {
+                ctx.fillRect(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height,
+                    3, 3
+                );
+            }
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('刮开查看奖品', canvas.width/2, canvas.height/2 - 20);
+            
+            ctx.font = '16px Arial';
+            ctx.fillText('🎁 神秘大奖等你拿', canvas.width/2, canvas.height/2 + 25);
+
+            let isDrawing = false;
+            const scratchRadius = 30;
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, scratchRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                checkScratched();
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('mouseup', () => { isDrawing = false; });
+            canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+            
+            canvas.addEventListener('touchstart', (e) => { 
+                isDrawing = true; 
+                scratch(e); 
+            }, {passive: false});
+            canvas.addEventListener('touchmove', scratch, {passive: false});
+            canvas.addEventListener('touchend', () => { isDrawing = false; });
+
+            function checkScratched() {
+                if (isScratched) return;
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                let transparentPixels = 0;
+                
+                for (let i = 3; i < pixels.length; i += 4) {
+                    if (pixels[i] < 128) transparentPixels++;
+                }
+                
+                const percent = transparentPixels / (pixels.length / 4);
+                if (percent > 0.3) {
+                    isScratched = true;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    setTimeout(showScratchResult, 500);
+                }
+            }
+        }
+
+        function showScratchResult() {
+            // 刮开后显示100万庆祝页面
+            document.getElementById('scratchSection').style.display = 'none';
+            document.getElementById('millionPage').style.display = 'block';
+            createConfetti();
+        }
+
+        function showPrank() {
+            document.body.classList.add('modal-open');
+            document.getElementById('prankModal').style.display = 'flex';
+            createConfetti();
+        }
+
+        function closePrank(e) {
+            if (e.target === document.getElementById('prankModal')) {
+                document.getElementById('prankModal').style.display = 'none';
+                document.body.classList.remove('modal-open');
+            }
+        }
+
+        function showAprilFoolScreen() {
+            document.getElementById('prankModal').style.display = 'none';
+            document.getElementById('aprilScreen').style.display = 'flex';
+            document.body.classList.remove('modal-open');
+            startConfettiLoop();
+        }
+
+        function startConfettiLoop() {
+            const interval = setInterval(() => {
+                if (document.getElementById('aprilScreen').style.display === 'none') {
+                    clearInterval(interval);
+                } else {
+                    createConfetti();
+                }
+            }, 1000);
+        }
+
+        function resetGame() {
+            isSpinning = false;
+            isScratched = false;
+            currentPrize = null;
+
+            // 隐藏所有奖品页面
+            document.getElementById('iphonePage').style.display = 'none';
+            document.getElementById('hongbaoPage').style.display = 'none';
+            document.getElementById('dollPage').style.display = 'none';
+            document.getElementById('millionPage').style.display = 'none';
+            document.getElementById('thanksPage').style.display = 'none';
+            document.getElementById('scratchSection').style.display = 'none';
+            document.getElementById('aprilScreen').style.display = 'none';
+            document.getElementById('prankModal').style.display = 'none';
+            
+            // 显示转盘
+            document.getElementById('wheelSection').style.display = 'block';
+            
+            const resetBtn = document.getElementById('resetBtn');
+            resetBtn.style.display = 'inline-block';
+            
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = false;
+            spinBtn.textContent = '开始抽奖 🎰';
+            
+            document.body.classList.remove('modal-open');
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b9d', '#fdcb6e', '#6c5ce7', '#00b894', '#e17055', '#0984e3', '#fff', '#ffd700'];
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.width = (Math.random() * 10 + 8) + 'px';
+                confetti.style.height = (Math.random() * 10 + 8) + 'px';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+
+        document.addEventListener('touchmove', function(e) {
+            if (document.body.classList.contains('modal-open')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        initWheel();
+    </script>
+</body>
+</html>
